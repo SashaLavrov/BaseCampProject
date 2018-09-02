@@ -1,0 +1,35 @@
+﻿@using BCMyProject.Models;
+@{
+    ViewData["Title"] = "MyPage";
+}
+
+<h2>Hey @Model.UserName</h2>
+<h2>Your boards</h2>
+@{ List<Board> listB = ViewBag.Boards;}
+@if (listB.Count() == 0 || listB == null)
+{
+    <div style="width: 300px; height:300px; background: #808080;"><p>Sorry you haven't board</p></div>
+}
+else
+{
+    @foreach (var r in ViewBag.Boards)
+    {
+        <div>@r.GetType().ToString()</div>
+    }
+    <p>hey2</p>
+}
+<h2>Your photos</h2>
+@{ List<Photo> listP = ViewBag.Photos;}
+@if (listP == null || listP.Count() == 0)
+{
+    <div style="width: 300px; height:300px; background: #808080;"><p>Sorry you haven't photos</p></div>
+}
+else
+{
+    @foreach (var r in ViewBag.Photos)
+    {
+        <div class="imgDiv">
+            <img src="@Url.Content(r.Path)" class="photoImage" />
+        </div>
+    }
+}

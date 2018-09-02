@@ -1,0 +1,22 @@
+﻿@model IEnumerable<BCMyProject.Models.Photo>
+@{
+    ViewData["Title"] = ViewBag.TopicName;
+}
+
+<h2>@ViewBag.TopicName</h2>
+
+<div class="masonry-layout">
+    @foreach (var f in Model)
+    {
+        <div class="masonry-layout__panel">
+            <div class="masonry-layout__panel-content">
+                
+                <div class="PhotoInfo">
+                    <img src="@Url.Content(f.Path)" class="ImgInfo"/>
+                    <div class="mask" onclick="window.location.href='@Url.Action("ShowThisPhoto", "Home", f)';" ></div>
+                    <button class="saveButtonMini" onclick="window.location.href='@Url.Action("GetFile", "Home", f)';">Загрузить</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,139 @@
+﻿body {
+    background-color: #E9F0F6;
+}
+
+.button {
+    border-radius: 4px;
+    margin-top: 12px;
+}
+.saveButton {
+    width: auto;
+    height: auto;
+    left: 60%;
+    top: 8%;
+    background-color: #D01222;
+    border-radius: 14px;
+    visibility: hidden;
+    position: absolute;
+    font-size: 2.1vw;
+    /*vw = 1 % от ширины пользовательской части окна браузера. */
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.saveButtonMini {
+    width: auto;
+    height: auto;
+    margin-right: 8%;
+    top: 8%;
+    background-color: #D01222;
+    border-radius: 14px;
+    visibility: hidden;
+    position: absolute;
+    font-size: 1.5vw;
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.mask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #222222;
+    opacity: 0.65;
+    top: 0;
+    visibility: hidden;
+    border-radius: 12px;
+}
+.PhotoInfo {
+    width: 100%;
+    height: auto;
+    background-color: #ffffff;
+    text-align: center;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+    .PhotoInfo:hover div {
+        visibility: visible;
+        cursor: pointer;
+    }
+
+.PhotoInfo:hover button {
+    visibility: visible;
+    transform: scale(1.2);
+}
+
+.ImgInfo {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-radius: 14px;
+}
+
+.ImgInfo:hover{
+    cursor:pointer;
+}
+
+.mainContainerInfo {
+    width: 70%;
+    height: 100%;
+    background-color: #ffffff;
+    text-align: center;
+    margin: 0 auto;
+    border-radius: 12px;
+    padding: 5px 5%;
+}
+
+.like-button {
+    font-size: 1.1vw;
+    border-radius: 6px;
+    background-color: #ffffff;
+    border: solid 2px #5F5F5F;
+    color: #B8B8B8;
+    transition: all 0.3s ease;
+}
+
+    .like-button:hover {
+        transform: scale(1.2);
+        color: #F06875;
+        border: solid 2px #F06875;
+    }
+
+/*this is colum*/
+.masonry-layout {
+    column-count: 3;
+    column-gap: 0;
+}
+
+.masonry-layout__panel {
+    break-inside: avoid;
+    padding: 5px;
+}
+
+.masonry-layout__panel-content {
+    padding: 10px;
+    border-radius: 14px;
+}
+
+/*This*/
+.SaveThisPhotoHeader{
+    
+}
+
+.SaveThisPhotoButton {
+    float: right;
+    width: auto;
+    height: auto;
+    background-color: #D01222;
+    border-radius: 14px;
+    font-size: 1.5vw;
+    color: #ffffff;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+}
+
+

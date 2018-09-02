@@ -1,0 +1,83 @@
+﻿@using BCMyProject.Models;
+@model IEnumerable<BCMyProject.Models.Photo>
+
+@{
+    ViewData["Title"] = "ShowThisPhoto";
+}
+<br />
+<div class="mainContainerInfo">@*This*@
+    <div class="SaveThisPhotoHeader">
+        <button class="SaveThisPhotoButton" onclick="window.location.href='@Url.Action("GetFile", "Home", (Photo)ViewBag.Photo)';">Загрузить</button>
+    </div>
+    <br />
+    <div class="PhotoInfo">
+        <img src="@Url.Content(ViewBag.Photo.Path)" class="ImgInfo" />
+    </div>
+    <input type="text" id="iddd" value="@ViewBag.Photo.Rating.Value" style="display:none" />
+    <button class="like-button" id="likeButton" ><i class="fa fa-thumbs-up" id="idd">@ViewBag.Photo.Rating.Value</i></button>
+    <hr />
+    <br />
+    <div class="ComentThisPhoto"></div>
+    
+</div>
+
+<br />
+<div id="coment">
+    @{ List<Coment> list = ViewBag.Coment;}
+    @if (list.Count() != 0 || list != null)
+    {
+        @foreach (var i in list)
+        {
+            <p>@i.User.Email : @i.Text</p>
+        }
+    }
+</div>
+<h2>Coments</h2>
+
+<div>
+    <input type="text" id="PhotoId" value="@ViewBag.Photo.PhotoId" style="display:none" />
+    <input type="text" id="UserName" value="@User.Identity.Name.ToString()" style="display:none" />
+    <p><textarea id="Text" style="width: 100%"></textarea></p>
+    <input type="submit" value="Отправить" id="SendButton" />
+</div>
+
+
+<input type="text" id="some" value="@ViewBag.LikeBool.ToString()" style="display:none" />
+<script>
+    var bool = some.value;
+    if (bool == "True") {
+        likeButton.style.color = '#F0120E'; likeButton.style.border = 'solid 2px #F0120E';
+    } else {
+        
+    }
+    let xhr1 = new XMLHttpRequest();
+    likeButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        this.style.color = '#F0120E'; this.style.border = 'solid 2px #F0120E';
+
+        xhr1.open('POST', '/Home/Like', true);
+        xhr1.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        let body1 = `PhotoId=${encodeURIComponent(PhotoId.value)}`;
+        xhr1.send(body1);
+    });
+
+    xhr1.onload = function () {
+        if (xhr1.status == 200) {
+            addLike(xhr1.responseText);
+        }
+    };
+
+    xhr1.onerror = function () {
+        alert(xhr1.status + ' - ' + xhr1.statusText);
+    };
+
+    function addLike() {
+        idd.innerHTML = ++iddd.value;
+    }
+    
+</script>
+
+
+
+

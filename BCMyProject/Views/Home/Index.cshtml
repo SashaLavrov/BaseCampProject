@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "main";
+}
+
+<div class="masonry-layout">
+    @foreach (var f in ViewBag.Some)
+    {
+        <div class="masonry-layout__panel">
+            <div class="masonry-layout__panel-content">
+                <img src="@Url.Content(f.Path)" onclick="window.location.href='@Url.Action("ShowAllPhotoInTopic", "Home", new { f.Topic }, null)';" class="ImgInfo" />
+                <h2>@f.Topic</h2>
+            </div>
+        </div>
+    }
+</div>
