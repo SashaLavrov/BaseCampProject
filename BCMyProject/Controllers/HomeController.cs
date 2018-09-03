@@ -90,15 +90,13 @@ namespace BCMyProject.Controllers
             ViewBag.Photo = _db.Photos.Include(r => r.Rating).Where(p => p == photo).First();
             ViewBag.Coment = _db.Coments.Include(u => u.User).Where(x => x.Photo == photo).ToList();
             ApplicationUser user = await GetCurrentUserAsync();
+            bool  isLike = false;
             IEnumerable<UserRating> res = _db.UserRatings.Where(x => x.UserId == user.Id && x.RatingId == photo.RatingId);
-            if (res.Count() == 0)
+            if (res.Count() != 0)
             {
-                ViewBag.LikeBool = false;
+                isLike = res.First().Like;
             }
-            else
-            {
-                ViewBag.LikeBool = true;
-            }
+            ViewBag.isLike = isLike;
             return View();
         }
 
@@ -145,24 +143,47 @@ namespace BCMyProject.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Like(ComentViewModel cvm)
+        public async Task<bool> Like(ComentViewModel cvm)
         {
             int p = Convert.ToInt32(cvm.PhotoId);
             ApplicationUser user = await GetCurrentUserAsync();
             Photo photo = _db.Photos.Where(x => x.PhotoId == p).First();
             Rating responce = _db.Ratings.Where(e => e.RatingId == photo.RatingId).First();
-            IEnumerable<UserRating> res = _db.UserRatings.Where(x => x.UserId == user.Id && x.RatingId == responce.RatingId);
-            if (res.Count() == 0)
+            IEnumerable<UserRating> result = _db.UserRatings.Where(x => x.UserId == user.Id && x.RatingId == photo.RatingId);
+            UserRating res = null;
+            if (result.Count() != 0)
             {
-                responce.Value++;
+                res = _db.UserRatings.Where(x => x.UserId == user.Id && x.RatingId == responce.RatingId).First();
+            }
+            
+            if (res == null)
+            {
                 _db.UserRatings.Add(new UserRating {
                     UserId = user.Id,
-                    RatingId = responce.RatingId
+                    RatingId = responce.RatingId,
+                    Like = true,
                 });
+                responce.Value++;
                 _db.SaveChanges();
-                return Ok();
+                return true;
+            }else if (res != null)
+            {
+                if (!res.Like)
+                {
+                    res.Like = true;
+                    responce.Value++;
+                    _db.SaveChanges();
+                    return true;
+                }
+                else
+                {
+                    res.Like = false;
+                    responce.Value--;
+                    _db.SaveChanges();
+                    return false;
+                }
             }
-            return BadRequest();
+            return false;
         }
 
         public async Task<ViewResult> MyPage()

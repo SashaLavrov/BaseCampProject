@@ -13,5 +13,8 @@ namespace BCMyProject.Models
 
         public int RatingId { get; set; }
         public Rating Rating { get; set; }
+
+        [Required]
+        public bool Like { get; set; }
     }
 }

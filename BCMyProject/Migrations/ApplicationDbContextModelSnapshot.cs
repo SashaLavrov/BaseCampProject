@@ -181,6 +181,8 @@ namespace BCMyProject.Migrations
 
                     b.Property<int>("RatingId");
 
+                    b.Property<bool>("Like");
+
                     b.HasKey("UserId", "RatingId");
 
                     b.HasIndex("RatingId");

@@ -40,21 +40,21 @@
     <p><textarea id="Text" style="width: 100%"></textarea></p>
     <input type="submit" value="Отправить" id="SendButton" />
 </div>
+<input type="text" value="@ViewBag.isLike.ToString()" style="display:none" id="IsLike"/>
 
 
-<input type="text" id="some" value="@ViewBag.LikeBool.ToString()" style="display:none" />
 <script>
-    var bool = some.value;
-    if (bool == "True") {
+    if (IsLike.value == 'True') {
         likeButton.style.color = '#F0120E'; likeButton.style.border = 'solid 2px #F0120E';
-    } else {
-        
+    } else if (IsLike.Value == 'False') {
+        likeButton.style.color = '#B8B8B8'; likeButton.style.border = 'solid 2px #5F5F5F';
     }
+
+
     let xhr1 = new XMLHttpRequest();
     likeButton.addEventListener('click', function (e) {
         e.preventDefault();
-        this.style.color = '#F0120E'; this.style.border = 'solid 2px #F0120E';
-
+        
         xhr1.open('POST', '/Home/Like', true);
         xhr1.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
@@ -63,8 +63,10 @@
     });
 
     xhr1.onload = function () {
-        if (xhr1.status == 200) {
-            addLike(xhr1.responseText);
+        if (xhr1.responseText == 'true') {
+            addLike();
+        } else if (xhr1.responseText == 'false') {
+            removeLike()
         }
     };
 
@@ -74,6 +76,12 @@
 
     function addLike() {
         idd.innerHTML = ++iddd.value;
+        likeButton.style.color = '#F0120E'; likeButton.style.border = 'solid 2px #F0120E';
+    }
+
+    function removeLike() {
+        idd.innerHTML = --iddd.value;
+        likeButton.style.color = '#B8B8B8'; likeButton.style.border = 'solid 2px #5F5F5F';
     }
     
 </script>
