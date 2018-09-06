@@ -9,6 +9,7 @@ namespace BCMyProject.Models
     public class ApplicationUser : IdentityUser
     {
         public byte[] Avatar { get; set; }
+        public string Nick { get; set; }
 
         public List<Coment> Coment { get; set; }
         public List<Board> Board { get; set; }

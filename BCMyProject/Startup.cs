@@ -27,7 +27,8 @@ namespace BCMyProject
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")
+                .Replace("|ProjectFolder|", Environment.CurrentDirectory + "\\Data")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>(opts => {
                 opts.Password.RequiredLength = 5;   // минимальная длина

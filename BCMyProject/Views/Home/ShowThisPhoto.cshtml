@@ -37,13 +37,23 @@
 <div>
     <input type="text" id="PhotoId" value="@ViewBag.Photo.PhotoId" style="display:none" />
     <input type="text" id="UserName" value="@User.Identity.Name.ToString()" style="display:none" />
-    <p><textarea id="Text" style="width: 100%"></textarea></p>
+    <p><textarea id="Text" style="width: 100%; resize: none;" placeholder="coment" maxlength="1000" rows="2"></textarea></p>
     <input type="submit" value="Отправить" id="SendButton" />
 </div>
 <input type="text" value="@ViewBag.isLike.ToString()" style="display:none" id="IsLike"/>
 
 
 <script>
+    document.getElementById("Text").addEventListener('focus', function (e) {
+        e.preventDefault();
+        this.rows = 5;
+    });
+
+    document.getElementById("Text").addEventListener('blur', function (e) {
+        e.preventDefault();
+        this.rows = 2;
+    });
+
     if (IsLike.value == 'True') {
         likeButton.style.color = '#F0120E'; likeButton.style.border = 'solid 2px #F0120E';
     } else if (IsLike.Value == 'False') {

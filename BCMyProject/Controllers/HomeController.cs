@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using BCMyProject.ViewModels;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
+
 namespace BCMyProject.Controllers
 {
     [Authorize]
@@ -25,7 +26,7 @@ namespace BCMyProject.Controllers
         readonly UserManager<ApplicationUser> _userManager;
 
         public HomeController(ApplicationDbContext db, IHostingEnvironment appEnvironment,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager, IHostingEnvironment env)
         {
             _db = db;
             _appEnvironment = appEnvironment;
@@ -54,6 +55,34 @@ namespace BCMyProject.Controllers
             string mail = user?.Email;
             ViewBag.UserName = mail;
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Upload(IFormFile file, string topic)
+        {
+            if (topic == null)
+            {
+                topic = "Some";
+            }
+            ApplicationUser User = await GetCurrentUserAsync();
+            string path = "/Files/" + file.FileName;
+            if (file.Length > 0)
+                using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }   
+            Photo photo = new Photo
+            {
+                PhotoName = file.FileName,
+                Path = path,
+                Topic = topic,
+                Date = DateTime.Now,
+                User = User,
+                Rating = new Rating()
+            };
+            _db.Photos.Add(photo);
+            _db.SaveChanges();
+            return Ok();
         }
 
         [HttpPost]
@@ -186,19 +215,52 @@ namespace BCMyProject.Controllers
             return false;
         }
 
-        public async Task<ViewResult> MyPage()
+        public async Task<IActionResult> MyPage()
         {
             ApplicationUser user = await GetCurrentUserAsync();
-            ViewBag.Boards = _db.Boards.Where(x => x.User == user).ToList();
-            ViewBag.Photos = _db.Photos.Where(x => x.User == user).ToList();
-            return View(user);
+            //ViewBag.Boards = _db.Boards.Where(x => x.User == user).Include(b => b.PhotoBoard).ThenInclude(b => b.Photo).ToList();
+            ViewBag.Boards = _db.Boards.GroupBy(x => x.BoardName)
+                .Select(grp => grp.First())
+                .Include(b => b.PhotoBoard)
+                .ThenInclude(b => b.Photo);
+            ViewBag.Photos = _db.Photos.Where(x => x.User == user)
+                .ToList();
+            ViewBag.User = user;
+            return View();
         }
 
-        public ViewResult Open(Photo p)
+        [HttpPost]
+        public async Task<IActionResult> Avatar(IFormFile Avatar)
         {
-            ViewBag.Var = p;
-            return View(p);
+            if (Avatar != null)
+            {
+                byte[] imageData = null;
+                // считываем переданный файл в массив байтов
+                using (var binaryReader = new BinaryReader(Avatar.OpenReadStream()))
+                {
+                    imageData = binaryReader.ReadBytes((int)Avatar.Length);
+                }
+                // установка массива байтов
+                ApplicationUser User = await GetCurrentUserAsync();
+                User.Avatar = imageData;
+            }
+            _db.SaveChanges();
+
+            return RedirectToAction("MyPage");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeNick(string Nick)
+        {
+            ApplicationUser User = await GetCurrentUserAsync();
+            if (Nick != null)
+            {
+                User.Nick = Nick;
+                _db.SaveChanges();
+            }
+            return RedirectToAction("MyPage");
+        }
+            
 
         public IActionResult About()
         {

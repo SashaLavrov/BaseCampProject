@@ -10,10 +10,9 @@
     {
         <div class="masonry-layout__panel">
             <div class="masonry-layout__panel-content">
-                
                 <div class="PhotoInfo">
-                    <img src="@Url.Content(f.Path)" class="ImgInfo"/>
-                    <div class="mask" onclick="window.location.href='@Url.Action("ShowThisPhoto", "Home", f)';" ></div>
+                    <img src="@Url.Content(f.Path)" class="ImgInfo" />
+                    <div class="mask" onclick="window.location.href='@Url.Action("ShowThisPhoto", "Home", f)';"></div>
                     <button class="saveButtonMini" onclick="window.location.href='@Url.Action("GetFile", "Home", f)';">Загрузить</button>
                 </div>
             </div>

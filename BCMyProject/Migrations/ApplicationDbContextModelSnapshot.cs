@@ -41,6 +41,8 @@ namespace BCMyProject.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
 
+                    b.Property<string>("Nick");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256);
 
