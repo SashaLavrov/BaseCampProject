@@ -1,4 +1,5 @@
-﻿
+﻿@using BCMyProject.Models;
+@model IEnumerable<BCMyProject.Models.Photo>
 @{
     ViewData["Title"] = "MyPage";
 }
@@ -27,6 +28,7 @@
         </div>
     </div>
     <div class="col-md-4">
+        <label>Изменить nick</label>
         <form asp-action="ChangeNick" asp-controller="Home" method="post">
             <p>
                 <input name="Nick" type="text" class="form-control" value="@ViewBag.User.Nick" />
@@ -73,13 +75,21 @@
             </div>
         </div>
 
-        @foreach (var f in ViewBag.Photos)
+        @foreach (var f in Model)
         {
-            <div class="masonry-layout__panel ">
+            <div class="masonry-layout__panel " id="@f.PhotoId">
                 <div class="masonry-layout__panel-content ">
                     <div class="PhotoInfo">
                         <img src="@Url.Content(f.Path)" class="ImgInfo" />
-                        <div class="mask"></div>
+                        <div class="mask" onclick="window.location.href='@Url.Action("ShowThisPhoto", "Home", f)';"></div>
+                        <span class="glyphicon glyphicon-remove"
+                              id="remove"
+                              onclick="Remove(@f.PhotoId)"
+                              title="Удалить"></span>
+                        <span class="glyphicon glyphicon-download-alt"
+                              id="dowenload"
+                              onclick="window.location.href='@Url.Action("GetFile", "Home", f)';"
+                              title="Загрузить"></span>
                     </div>
                 </div>
             </div>
@@ -96,7 +106,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
                 <h4 class="modal-title" id="myModalLabel">Добавление фото</h4>
-                <input type="text" name="Topic" id="topic" placeholder="Введи тему картинки" class="form-control"/>
+                <input type="text" name="Topic" id="topic" placeholder="Введи тему картинки" class="form-control" />
             </div>
             <div class="modal-body">
                 <div id="drop-area">
@@ -117,3 +127,4 @@
 </div>
 
 <script type="text/javascript" src="~/js/DragAndDrop.js"></script>
+<script type="text/javascript" src="~/js/remove.js"></script>

@@ -14,14 +14,12 @@ namespace BCMyProject.Models
         public List<Coment> Coment { get; set; }
         public List<Board> Board { get; set; }
         public List<Photo> Photos { get; set; }
-        public List<UserRating> UserRating { get; set; }
 
         public ApplicationUser()
         {
             Coment = new List<Coment>();
             Board = new List<Board>();
             Photos = new List<Photo>();
-            UserRating = new List<UserRating>();
         }
     }
 }

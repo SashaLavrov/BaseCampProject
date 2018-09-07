@@ -119,6 +119,22 @@ namespace BCMyProject.Migrations
                     b.ToTable("Coments");
                 });
 
+            modelBuilder.Entity("BCMyProject.Models.Like", b =>
+                {
+                    b.Property<int>("LikeId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("PhotoId");
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("LikeId");
+
+                    b.HasIndex("PhotoId");
+
+                    b.ToTable("Likes");
+                });
+
             modelBuilder.Entity("BCMyProject.Models.Photo", b =>
                 {
                     b.Property<int>("PhotoId")
@@ -133,8 +149,6 @@ namespace BCMyProject.Migrations
                         .IsRequired()
                         .HasMaxLength(200);
 
-                    b.Property<int>("RatingId");
-
                     b.Property<string>("Topic")
                         .IsRequired();
 
@@ -142,8 +156,6 @@ namespace BCMyProject.Migrations
                         .IsRequired();
 
                     b.HasKey("PhotoId");
-
-                    b.HasIndex("RatingId");
 
                     b.HasIndex("UserId");
 
@@ -161,35 +173,6 @@ namespace BCMyProject.Migrations
                     b.HasIndex("PhotoId");
 
                     b.ToTable("PhotoBoard");
-                });
-
-            modelBuilder.Entity("BCMyProject.Models.Rating", b =>
-                {
-                    b.Property<int>("RatingId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Value")
-                        .ValueGeneratedOnAdd()
-                        .HasDefaultValue(0);
-
-                    b.HasKey("RatingId");
-
-                    b.ToTable("Ratings");
-                });
-
-            modelBuilder.Entity("BCMyProject.Models.UserRating", b =>
-                {
-                    b.Property<string>("UserId");
-
-                    b.Property<int>("RatingId");
-
-                    b.Property<bool>("Like");
-
-                    b.HasKey("UserId", "RatingId");
-
-                    b.HasIndex("RatingId");
-
-                    b.ToTable("UserRatings");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -321,13 +304,16 @@ namespace BCMyProject.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("BCMyProject.Models.Like", b =>
+                {
+                    b.HasOne("BCMyProject.Models.Photo", "Photo")
+                        .WithMany("Like")
+                        .HasForeignKey("PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("BCMyProject.Models.Photo", b =>
                 {
-                    b.HasOne("BCMyProject.Models.Rating", "Rating")
-                        .WithMany("Photo")
-                        .HasForeignKey("RatingId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("BCMyProject.Models.ApplicationUser", "User")
                         .WithMany("Photos")
                         .HasForeignKey("UserId")
@@ -345,19 +331,6 @@ namespace BCMyProject.Migrations
                         .WithMany("PhotoBoard")
                         .HasForeignKey("PhotoId")
                         .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("BCMyProject.Models.UserRating", b =>
-                {
-                    b.HasOne("BCMyProject.Models.Rating", "Rating")
-                        .WithMany("UserRating")
-                        .HasForeignKey("RatingId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("BCMyProject.Models.ApplicationUser", "User")
-                        .WithMany("UserRating")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

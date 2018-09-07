@@ -13,7 +13,10 @@
                 <div class="PhotoInfo">
                     <img src="@Url.Content(f.Path)" class="ImgInfo" />
                     <div class="mask" onclick="window.location.href='@Url.Action("ShowThisPhoto", "Home", f)';"></div>
-                    <button class="saveButtonMini" onclick="window.location.href='@Url.Action("GetFile", "Home", f)';">Загрузить</button>
+                    <span class="glyphicon glyphicon-download-alt"
+                          id="dowenload"
+                          onclick="window.location.href='@Url.Action("GetFile", "Home", f)';"
+                          title="Загрузить"></span>
                 </div>
             </div>
         </div>

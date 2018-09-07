@@ -13,9 +13,7 @@ namespace BCMyProject.Data
         public DbSet<Board> Boards { get; set; }
         public DbSet<Photo> Photos { get; set; }
         public DbSet<Coment> Coments { get; set; }
-        public DbSet<Rating> Ratings { get; set; }
-        public DbSet<UserRating> UserRatings { get; set; }
-
+        public DbSet<Like> Likes { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -28,9 +26,6 @@ namespace BCMyProject.Data
 
             builder.Entity<PhotoBoard>()
                 .HasKey(t => new { t.BoardId, t.PhotoId });
-
-            builder.Entity<UserRating>()
-                .HasKey(t => new { t.UserId, t.RatingId });
 
             builder.Entity<PhotoBoard>()
                 .HasOne(bp => bp.Board)
@@ -48,10 +43,6 @@ namespace BCMyProject.Data
                 .HasOne(x => x.User)
                 .WithMany(c => c.Coment)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Rating>()
-                .Property(x => x.Value)
-                .HasDefaultValue(0);
         }
     }
 }

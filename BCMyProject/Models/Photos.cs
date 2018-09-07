@@ -31,11 +31,11 @@ namespace BCMyProject.Models
 
         public List<Coment> Coment { get; set; }
 
-        public int RatingId { get; set; }
-        public Rating Rating { get; set; }
+        public List<Like> Like { get; set; }
 
         public Photo()
         {
+            Like = new List<Like>();
             PhotoBoard = new List<PhotoBoard>();
             Coment = new List<Coment>();
         }

@@ -78,58 +78,30 @@ namespace BCMyProject.Controllers
                 Topic = topic,
                 Date = DateTime.Now,
                 User = User,
-                Rating = new Rating()
             };
             _db.Photos.Add(photo);
             _db.SaveChanges();
             return Ok();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddFile(IFormFile uploadedFile, string Topic)
-        {
-            ApplicationUser User = await GetCurrentUserAsync();
-            if (uploadedFile != null)
-            {
-                // путь к папке Files
-                string path = "/Files/" + uploadedFile.FileName;
-                // сохраняем файл в папку Files в каталоге wwwroot
-                using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
-                {
-                    await uploadedFile.CopyToAsync(fileStream);
-                }
-                Photo file = new Photo
-                {
-                    PhotoName = uploadedFile.FileName,
-                    Path = path,
-                    Topic = Topic,
-                    Date = DateTime.Now,
-                    User = User,
-                    Rating = new Rating()
-                };
-                _db.Photos.Add(file);
-                _db.SaveChanges();
-            }
-
-            return Redirect("~/Home/Index");
-        }
 
         public async Task<IActionResult> ShowThisPhoto(Photo photo)
         {
-            ViewBag.Photo = _db.Photos.Include(r => r.Rating).Where(p => p == photo).First();
-            ViewBag.Coment = _db.Coments.Include(u => u.User).Where(x => x.Photo == photo).ToList();
             ApplicationUser user = await GetCurrentUserAsync();
-            bool  isLike = false;
-            IEnumerable<UserRating> res = _db.UserRatings.Where(x => x.UserId == user.Id && x.RatingId == photo.RatingId);
-            if (res.Count() != 0)
+            bool isLike = false;
+            //ShowThisPhotoViewModel stpvm = new ShowThisPhotoViewModel();
+            List<Coment> coments = _db.Coments.Include(u => u.User).Where(x => x.Photo == photo).ToList();
+            int ratingVal = _db.Likes.Where(l => l.PhotoId == photo.PhotoId).Count();
+            isLike = _db.Likes.Select(l => l.UserId).Contains(user.Id);
+            ShowThisPhotoViewModel model = new ShowThisPhotoViewModel
             {
-                isLike = res.First().Like;
-            }
-            ViewBag.isLike = isLike;
-            return View();
+                Coments = coments,
+                IsCurrentUserLike = isLike,
+                Photo = photo,
+                Rating = ratingVal
+            };
+            return View(model);
         }
-
-        
 
         public IActionResult GetFile(Photo photo)
         {
@@ -172,47 +144,27 @@ namespace BCMyProject.Controllers
         }
 
         [HttpPost]
-        public async Task<bool> Like(ComentViewModel cvm)
+        public async Task<bool> Like(int PhotoId)
         {
-            int p = Convert.ToInt32(cvm.PhotoId);
             ApplicationUser user = await GetCurrentUserAsync();
-            Photo photo = _db.Photos.Where(x => x.PhotoId == p).First();
-            Rating responce = _db.Ratings.Where(e => e.RatingId == photo.RatingId).First();
-            IEnumerable<UserRating> result = _db.UserRatings.Where(x => x.UserId == user.Id && x.RatingId == photo.RatingId);
-            UserRating res = null;
-            if (result.Count() != 0)
+            bool isLike = _db.Likes.Select(l => l.PhotoId ).Contains(PhotoId);
+
+            if (!isLike)
             {
-                res = _db.UserRatings.Where(x => x.UserId == user.Id && x.RatingId == responce.RatingId).First();
-            }
-            
-            if (res == null)
-            {
-                _db.UserRatings.Add(new UserRating {
-                    UserId = user.Id,
-                    RatingId = responce.RatingId,
-                    Like = true,
+                _db.Likes.Add(new Like {
+                    PhotoId = PhotoId,
+                    UserId = user.Id
                 });
-                responce.Value++;
                 _db.SaveChanges();
                 return true;
-            }else if (res != null)
-            {
-                if (!res.Like)
-                {
-                    res.Like = true;
-                    responce.Value++;
-                    _db.SaveChanges();
-                    return true;
-                }
-                else
-                {
-                    res.Like = false;
-                    responce.Value--;
-                    _db.SaveChanges();
-                    return false;
-                }
             }
-            return false;
+            else 
+            {
+                Like like = _db.Likes.Where(l => l.UserId == user.Id && l.PhotoId == PhotoId).First();
+                _db.Likes.Remove(like);
+                _db.SaveChanges();
+                return false;
+            }
         }
 
         public async Task<IActionResult> MyPage()
@@ -223,10 +175,10 @@ namespace BCMyProject.Controllers
                 .Select(grp => grp.First())
                 .Include(b => b.PhotoBoard)
                 .ThenInclude(b => b.Photo);
-            ViewBag.Photos = _db.Photos.Where(x => x.User == user)
+            IEnumerable<Photo> photos = _db.Photos.Where(x => x.User == user)
                 .ToList();
             ViewBag.User = user;
-            return View();
+            return View(photos);
         }
 
         [HttpPost]
@@ -260,7 +212,24 @@ namespace BCMyProject.Controllers
             }
             return RedirectToAction("MyPage");
         }
-            
+        
+        [HttpPost]
+        public async Task<IActionResult> RemoveFile(int photo)
+        {
+            Photo Photo = _db.Photos.Where(p => p.PhotoId == photo).First();
+            ApplicationUser user = await GetCurrentUserAsync();
+            if ((System.IO.File.Exists($"wwwroot/{Photo.Path}")))
+            {
+                if (Photo.User == user)
+                {
+                    _db.Photos.Remove(Photo);
+                    System.IO.File.Delete($"wwwroot/{Photo.Path}");
+                    _db.SaveChanges();
+                    return Ok();
+                }
+            }
+            return BadRequest();
+        }
 
         public IActionResult About()
         {

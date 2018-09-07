@@ -77,13 +77,36 @@ function addImg(file) {
     let reader = new FileReader()
     reader.readAsDataURL(file)
     reader.onloadend = function () {
-        let penalEl = document.createElement('div'); penalEl.className = 'masonry-layout__panel';
-        let penalContentEl = document.createElement('div'); penalContentEl.className = 'masonry-layout__panel-content';
-        let photoInfo = document.createElement('div'); photoInfo.className = 'PhotoInfo';
-        let img = document.createElement('img'); img.className = 'ImgInfo'; img.src = reader.result;
-        let mask = document.createElement('div'); mask.className = 'mask';
+        let penalEl = document.createElement('div');
+        penalEl.className = 'masonry-layout__panel';
+
+        let penalContentEl = document.createElement('div');
+        penalContentEl.className = 'masonry-layout__panel-content';
+
+        let photoInfo = document.createElement('div');
+        photoInfo.className = 'PhotoInfo';
+
+        let img = document.createElement('img');
+        img.className = 'ImgInfo';
+        img.src = reader.result;
+
+        let mask = document.createElement('div');
+        mask.className = 'mask';
+
+        let remove = document.createElement('span');
+        remove.className = 'glyphicon glyphicon-remove';
+        remove.id = 'remove';
+        remove.title = 'Удалить';
+
+        let dowenload = document.createElement('span');
+        dowenload.className = 'glyphicon glyphicon-download-alt';
+        dowenload.id = 'dowenload';
+        dowenload.title = 'Загрузить';
 
         photoInfo.appendChild(img)
+        photoInfo.appendChild(mask)
+        photoInfo.appendChild(remove)
+        photoInfo.appendChild(dowenload)
         penalContentEl.appendChild(photoInfo)
         penalEl.appendChild(penalContentEl);
         target.appendChild(penalEl);
