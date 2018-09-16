@@ -13,8 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using BCMyProject.ViewModels;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
+using BCMyProject.Exstension;
 
 namespace BCMyProject.Controllers
 {
@@ -37,24 +36,34 @@ namespace BCMyProject.Controllers
 
         public IActionResult Index()
         {
-            ViewBag.Topic = _db.Photos.Select(x => x.Topic).Distinct();
-            ViewBag.Some = _db.Photos.GroupBy(x => x.Topic).Select(grp => grp.First());
-            return View();
+            IEnumerable<Photo> photo = _db.Photos
+                .GroupBy(x => x.Topic)
+                .Select(grp => grp.First())
+                .Distinct();
+
+            IndexViewModel model = new IndexViewModel {
+                Photo = photo,
+            };
+
+            return View(model);
         }
 
-        public ViewResult ShowAllPhotoInTopic(string topic)
+        public async Task<ViewResult> ShowAllPhotoInTopic(string topic)
         {
-            ViewBag.TopicName = topic;
-            var res = _db.Photos.Where(x => x.Topic == topic);
-            return View(res);
-        }
+            ApplicationUser user = await GetCurrentUserAsync();
+            IEnumerable<Photo> Photo = _db.Photos
+                .Where(x => x.Topic == topic);
+            IEnumerable<Board> Board = _db.Boards
+                .Where(b => b.UserId == user.Id)
+                .Include(b => b.PhotoBoard)
+                .ThenInclude(b => b.Photo);
 
-        public async Task<ViewResult> AddFile()
-        {
-            var user = await GetCurrentUserAsync();
-            string mail = user?.Email;
-            ViewBag.UserName = mail;
-            return View();
+            ShowAllPhotoInTopicViewModel model = new ShowAllPhotoInTopicViewModel {
+                Photo = Photo,
+                TopicName = topic,
+                Board = Board,                
+            };
+            return View(model);
         }
 
         [HttpPost]
@@ -62,7 +71,7 @@ namespace BCMyProject.Controllers
         {
             if (topic == null)
             {
-                topic = "Some";
+                topic = "Разное";
             }
             ApplicationUser User = await GetCurrentUserAsync();
             string path = "/Files/" + file.FileName;
@@ -84,21 +93,30 @@ namespace BCMyProject.Controllers
             return Ok();
         }
 
-
         public async Task<IActionResult> ShowThisPhoto(Photo photo)
         {
             ApplicationUser user = await GetCurrentUserAsync();
-            bool isLike = false;
-            //ShowThisPhotoViewModel stpvm = new ShowThisPhotoViewModel();
-            List<Coment> coments = _db.Coments.Include(u => u.User).Where(x => x.Photo == photo).ToList();
-            int ratingVal = _db.Likes.Where(l => l.PhotoId == photo.PhotoId).Count();
-            isLike = _db.Likes.Select(l => l.UserId).Contains(user.Id);
+            List<Coment> coments = _db.Coments
+                .Include(u => u.User)
+                .Where(x => x.Photo == photo)
+                .ToList();
+            int ratingVal = _db.Likes
+                .Where(l => l.PhotoId == photo.PhotoId)
+                .Count();
+            bool isLike = _db.Likes
+                .Where(x => x.PhotoId == photo.PhotoId && x.UserId == user.Id)
+                .IsNullOrEmpty();
+            IEnumerable<Board> Board = _db.Boards
+                .Where(b => b.UserId == user.Id)
+                .Include(b => b.PhotoBoard)
+                .ThenInclude(b => b.Photo);
             ShowThisPhotoViewModel model = new ShowThisPhotoViewModel
             {
                 Coments = coments,
-                IsCurrentUserLike = isLike,
+                IsCurrentUserLike = !isLike,
                 Photo = photo,
-                Rating = ratingVal
+                Rating = ratingVal,
+                Board = Board
             };
             return View(model);
         }
@@ -107,18 +125,13 @@ namespace BCMyProject.Controllers
         {
             // Путь к файлу
             string file_path = Path.Combine(_appEnvironment.ContentRootPath, $"wwwroot{photo.Path}");
-
-            //
             string MyString = Path.GetExtension(photo.Path);
             char[] MyChar = { '.' };
             string NewString = MyString.TrimStart(MyChar);
             // Тип файла - content-type
             string file_type = $"application/{NewString}";
             // Имя файла - необязательно
-            PhysicalFileResult res = PhysicalFile(file_path, file_type, photo.PhotoName);
-            //
-            res.FileDownloadName = photo.PhotoName;
-            //
+            PhysicalFileResult res = PhysicalFile(file_path, file_type,photo.PhotoId + "." + NewString);
             return res;
         }
 
@@ -147,9 +160,11 @@ namespace BCMyProject.Controllers
         public async Task<bool> Like(int PhotoId)
         {
             ApplicationUser user = await GetCurrentUserAsync();
-            bool isLike = _db.Likes.Select(l => l.PhotoId ).Contains(PhotoId);
+            bool isLike = _db.Likes
+               .Where(x => x.PhotoId == PhotoId && x.UserId == user.Id)
+               .IsNullOrEmpty();
 
-            if (!isLike)
+            if (isLike)
             {
                 _db.Likes.Add(new Like {
                     PhotoId = PhotoId,
@@ -160,7 +175,9 @@ namespace BCMyProject.Controllers
             }
             else 
             {
-                Like like = _db.Likes.Where(l => l.UserId == user.Id && l.PhotoId == PhotoId).First();
+                Like like = _db.Likes
+                    .Where(l => l.UserId == user.Id && l.PhotoId == PhotoId)
+                    .First();
                 _db.Likes.Remove(like);
                 _db.SaveChanges();
                 return false;
@@ -170,15 +187,22 @@ namespace BCMyProject.Controllers
         public async Task<IActionResult> MyPage()
         {
             ApplicationUser user = await GetCurrentUserAsync();
-            //ViewBag.Boards = _db.Boards.Where(x => x.User == user).Include(b => b.PhotoBoard).ThenInclude(b => b.Photo).ToList();
-            ViewBag.Boards = _db.Boards.GroupBy(x => x.BoardName)
-                .Select(grp => grp.First())
+            IEnumerable<Photo> photos = _db.Photos
+                .Where(p => p.UserId == user.Id);
+
+            IEnumerable<Board> boards = _db.Boards
+                .Where(b => b.UserId == user.Id)
                 .Include(b => b.PhotoBoard)
                 .ThenInclude(b => b.Photo);
-            IEnumerable<Photo> photos = _db.Photos.Where(x => x.User == user)
-                .ToList();
-            ViewBag.User = user;
-            return View(photos);
+            
+            MyPageViewModel model = new MyPageViewModel
+            {
+                Boards = boards,
+                Photos = photos,
+                User = user
+            };
+
+            return View(model);
         }
 
         [HttpPost]
@@ -216,14 +240,135 @@ namespace BCMyProject.Controllers
         [HttpPost]
         public async Task<IActionResult> RemoveFile(int photo)
         {
-            Photo Photo = _db.Photos.Where(p => p.PhotoId == photo).First();
-            ApplicationUser user = await GetCurrentUserAsync();
-            if ((System.IO.File.Exists($"wwwroot/{Photo.Path}")))
+            IEnumerable<Photo> ph =  _db.Photos.Where(p => p.PhotoId == photo);
+            if (!ph.IsNullOrEmpty())
             {
-                if (Photo.User == user)
+                Photo Photo = ph.First();
+                ApplicationUser user = await GetCurrentUserAsync();
+                if (System.IO.File.Exists($"wwwroot/{Photo.Path}"))
                 {
-                    _db.Photos.Remove(Photo);
-                    System.IO.File.Delete($"wwwroot/{Photo.Path}");
+                    if (Photo.User == user)
+                    {
+                        IEnumerable<PhotoBoard> pb = _db.PhotoBoards.Where(p => p.PhotoId == photo);
+                        if (!pb.IsNullOrEmpty())
+                        {
+                            _db.PhotoBoards.RemoveRange(pb);
+                        }
+                        _db.Photos.Remove(Photo);
+                        System.IO.File.Delete($"wwwroot/{Photo.Path}");
+                        _db.SaveChanges();
+                        return Ok();
+                    }
+                }
+                return BadRequest();
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateBoard(string boardName)
+        {
+            if (boardName != null)
+            {
+                ApplicationUser user = await GetCurrentUserAsync();
+                Board Board = new Board
+                {
+                    BoardName = boardName,
+                    UserId = user.Id
+                };
+                _db.Boards.Add(Board);
+                _db.SaveChanges();
+                var responce = Board.BoardId;
+                return Json(responce);
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddPhotInBoard(int boardId, int photoId)
+        {
+            ApplicationUser user = await GetCurrentUserAsync();
+            bool res = _db.PhotoBoards
+                .Where(x => x.BoardId == boardId && x.PhotoId == photoId)
+                .IsNullOrEmpty();
+            if (res)
+            {
+                _db.PhotoBoards.Add(new PhotoBoard
+                {
+                    PhotoId = photoId,
+                    BoardId = boardId
+                });
+                _db.SaveChanges();
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        public async Task<IActionResult> ShowAllPhotoInBoard(int boardId)
+        {
+            ApplicationUser user = await GetCurrentUserAsync();
+            IEnumerable<Photo> photo = _db.PhotoBoards
+                .Where(p => p.BoardId == boardId && p.Board.UserId == user.Id)
+                .Select(x => x.Photo);
+
+            string boardName = _db.Boards.Where(b => b.BoardId == boardId)
+                .First()
+                .BoardName;
+
+            ShowAllPhotoInBoardViewModal modal = new ShowAllPhotoInBoardViewModal
+            {
+                Photo = photo,
+                BoardName = boardName,
+                BoardId = boardId,
+            };
+            return View(modal);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveBoard(int boardId)
+        {
+            ApplicationUser user = await GetCurrentUserAsync();
+
+            IEnumerable<Board> board = _db.Boards
+                .Where(x => x.BoardId == boardId);
+
+            if (!board.IsNullOrEmpty())
+            {
+                IEnumerable<PhotoBoard> pb = _db.PhotoBoards
+                    .Where(x => x.BoardId == boardId);
+
+                if (!pb.IsNullOrEmpty())
+                {
+                    _db.PhotoBoards.RemoveRange(pb);
+                    _db.SaveChanges();
+                }
+                _db.Boards.RemoveRange(board);
+                _db.SaveChanges();
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+        public async Task<IActionResult> RemovePhotoFromBoard(int boardId, int photoId)
+        {
+            ApplicationUser user = await GetCurrentUserAsync();
+            var board = _db.Boards
+                .Where(x => x.BoardId == boardId && x.UserId == user.Id);
+            if (!board.IsNullOrEmpty())
+            {
+                var pb = _db.PhotoBoards.Where(x => x.BoardId == board
+                    .First()
+                    .BoardId && x.PhotoId == photoId);
+
+                if (!pb.IsNullOrEmpty())
+                {
+                    _db.PhotoBoards.RemoveRange(pb);
                     _db.SaveChanges();
                     return Ok();
                 }
@@ -231,24 +376,9 @@ namespace BCMyProject.Controllers
             return BadRequest();
         }
 
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
-
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
-
 }

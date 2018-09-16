@@ -2,39 +2,6 @@
     background-color: #E9F0F6;
 }
 
-.button {
-    border-radius: 4px;
-    margin-top: 12px;
-}
-.saveButton {
-    width: auto;
-    height: auto;
-    left: 60%;
-    top: 8%;
-    background-color: #D01222;
-    border-radius: 14px;
-    visibility: hidden;
-    position: absolute;
-    font-size: 2.1vw;
-    /*vw = 1 % от ширины пользовательской части окна браузера. */
-    color: #ffffff;
-    transition: all 0.3s ease;
-}
-
-.saveButtonMini {
-    width: auto;
-    height: auto;
-    margin-right: 8%;
-    top: 8%;
-    background-color: #D01222;
-    border-radius: 14px;
-    visibility: hidden;
-    position: absolute;
-    font-size: 1.5vw;
-    color: #ffffff;
-    transition: all 0.3s ease;
-}
-
 .PhotoInfo {
     width: 100%;
     height: auto;
@@ -45,11 +12,12 @@
     overflow: hidden;
     position: relative;
     margin-bottom: 10px;
+    margin-top: 20px;
 }
 
     .PhotoInfo:hover div {
         visibility: visible;
-        cursor: pointer;
+        cursor: zoom-in;
     }
 
 .PhotoInfo:hover button {
@@ -105,50 +73,11 @@
 }
 
 .masonry-layout__panel-content {
-    padding: 10px;
+    padding:0 10px 0 10px;
     border-radius: 14px;
 }
 
 /*This*/
-/*.SaveThisPhotoHeader{
-    
-}*/
-
-.SaveThisPhotoButton {
-    float: right;
-    width: auto;
-    height: auto;
-    background-color: #D01222;
-    border-radius: 14px;
-    font-size: 1.5vw;
-    color: #ffffff;
-    transition: all 0.3s ease;
-    margin-bottom: 10px;
-}
-
-.board {
-    background-color: #D3D3D3;
-    text-align: center;
-    height: 360px;
-    border-radius: 12px;
-    line-height: 360px;
-    margin: 10px;
-    width: 100%;
-}
-
-    .board span {
-        color: red;
-        font-size: 3vw;
-    }
-
-    .board:hover {
-        background-color: #ffffff;
-        cursor: pointer;
-    }
-
-    .board span:hover {
-        color: forestgreen;
-    }
 
 .photo {
     width: 100%;
@@ -232,26 +161,37 @@ p {
     top: 0;
     visibility: hidden;
     border-radius: 12px;
-}
+    }
 
-#dowenload {
-    font-size: 3.5vw;
+#SaveInMyBoards {
+    font-size: 3vw;
     position: absolute;
-    left: 75%;
+    left: 5%;
     top: 5%;
     visibility: hidden;
 }
 
-    #dowenload:hover {
+    #SaveInMyBoards:hover {
+        cursor: pointer;
+    }
+
+#download {
+    font-size: 3vw;
+    position: absolute;
+    left: 80%;
+    top: 5%;
+    visibility: hidden;
+}
+
+    #download:hover {
         cursor: pointer;
     }
 
 #remove {
-    font-size: 3.5vw;
+    font-size: 3vw;
     position: absolute;
     left: 5%;
     top: 5%;
-    transition: all 0.3s ease;
     visibility: hidden;
 }
 
@@ -259,7 +199,7 @@ p {
         cursor: pointer;
     }
 
-.PhotoInfo:hover #dowenload {
+.PhotoInfo:hover #download  {
     color: #ffffff;
     opacity: 1;
     visibility: visible;
@@ -268,6 +208,27 @@ p {
 .PhotoInfo:hover #remove {
     color: #ffffff;
     opacity: 1;
-    transform: rotateZ(180deg);
+    visibility: visible;
+}
+
+.PhotoInfo:hover #SaveInMyBoards {
+    color: #ffffff;
+    opacity: 1;
+    visibility: visible;
+}
+
+.picItem {
+   line-height: 48px;
+}
+
+.picItem button {
+    visibility: hidden;
+}
+
+    .picItem:hover {
+        background-color: #D3D3D3;
+    }
+
+.picItem:hover button {
     visibility: visible;
 }

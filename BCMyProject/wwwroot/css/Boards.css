@@ -1,0 +1,28 @@
+﻿.board {
+    background-color: #D3D3D3;
+    text-align: center;
+    height: 360px;
+    border-radius: 12px;
+    line-height: 360px;
+    margin: 10px;
+    width: 100%;
+}
+
+    .board span {
+        color: red;
+        font-size: 3vw;
+    }
+
+    .board:hover {
+        background-color: #ffffff;
+        cursor: pointer;
+    }
+
+    .board span:hover {
+        color: forestgreen;
+    }
+
+.boardImg{
+    width: 100%;
+    height: auto;
+}

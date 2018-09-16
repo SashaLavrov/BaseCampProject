@@ -98,15 +98,15 @@ function addImg(file) {
         remove.id = 'remove';
         remove.title = 'Удалить';
 
-        let dowenload = document.createElement('span');
-        dowenload.className = 'glyphicon glyphicon-download-alt';
-        dowenload.id = 'dowenload';
-        dowenload.title = 'Загрузить';
+        let download = document.createElement('span');
+        download.className = 'glyphicon glyphicon-download';
+        download.id = 'dowenload';
+        download.title = 'Загрузить';
 
         photoInfo.appendChild(img)
         photoInfo.appendChild(mask)
         photoInfo.appendChild(remove)
-        photoInfo.appendChild(dowenload)
+        photoInfo.appendChild(download)
         penalContentEl.appendChild(photoInfo)
         penalEl.appendChild(penalContentEl);
         target.appendChild(penalEl);

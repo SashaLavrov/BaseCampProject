@@ -1,15 +1,15 @@
-﻿@using BCMyProject.Models;
-@model IEnumerable<BCMyProject.Models.Photo>
+﻿@model BCMyProject.ViewModels.MyPageViewModel
+@using BCMyProject.Exstension;
 @{
     ViewData["Title"] = "MyPage";
 }
-
+<style></style>
 <div class="container" style="margin-top: 10px;">
     <div class="col-md-4">
         <div class="col-md-12">
-            @if (ViewBag.User.Avatar != null)
+            @if (Model.User.Avatar != null)
             {
-                <img src="data:image/jpeg;base64,@(Convert.ToBase64String(ViewBag.User.Avatar))" style="max-width: 100%; height:auto;" title="avatar" />
+                <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.User.Avatar))" style="max-width: 100%; height:auto;" title="avatar" />
             }
             else
             {
@@ -28,10 +28,10 @@
         </div>
     </div>
     <div class="col-md-4">
-        <label>Изменить nick</label>
+        <label>Изменить имя</label>
         <form asp-action="ChangeNick" asp-controller="Home" method="post">
             <p>
-                <input name="Nick" type="text" class="form-control" value="@ViewBag.User.Nick" />
+                <input name="Nick" type="text" class="form-control" value="@Model.User.Nick" />
             </p>
             <p>
                 <input type="submit" value="Изменить" class="col-md-4 col-md-offset-4" />
@@ -42,25 +42,59 @@
 <hr />
 
 <div class="container">
-    <h2>Заметки</h2>
-    <div class="col-md-3">
-        <div class="board">
-            <span class="glyphicon glyphicon-plus-sign"></span>
-        </div>
-    </div>
-    @foreach (var r in ViewBag.Boards)
-    {
-        foreach (var t in r.PhotoBoard)
-        {
-            <div class="col-md-3">
-                <div class="board">
-                    <img src="@t.Photo.Path" />
-                    <h3>@r.BoardName</h3>
+    <h2>Доски</h2>
+    <div class="masonry-layout" id="listBoard">
+        <div class="masonry-layout__panel ">
+            <div class="masonry-layout__panel-content ">
+                <div class="PhotoInfo">
+                    <div class="col-md-4 photo" data-toggle="modal" data-target="#ModalBoard">
+                        <span class="glyphicon glyphicon-plus-sign"></span>
+                    </div>
                 </div>
             </div>
+        </div>
+        @foreach (var r in Model.Boards)
+        {
+            @if (r.PhotoBoard.IsNullOrEmpty())
+            {
+                <div class="masonry-layout__panel" id="@r.BoardId">
+                    <div class="masonry-layout__panel-content ">
+                        <div class="PhotoInfo">
+                            <img src="~/images/noimage.png" class="ImgInfo" />
+                            <h3>@r.BoardName</h3>
+                            <div class="mask"></div>
+                            <span class="glyphicon glyphicon-remove"
+                                  id="remove"
+                                  data-toggle="modal" 
+                                  data-target="#ModalBoardRemove"
+                                  data-id="@r.BoardId"
+                                  title="Удалить"></span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="masonry-layout__panel" id="@r.BoardId">
+                    <div class="masonry-layout__panel-content ">
+                        <div class="PhotoInfo">
+                            <img src="@r.PhotoBoard.First().Photo.Path" class="ImgInfo" />
+                            <h3>@r.BoardName</h3>
+                            <div class="mask" onclick="window.location.href='@Url.Action("ShowAllPhotoInBoard", "Home", new { r.BoardId})';"></div>
+                            <span class="glyphicon glyphicon-remove"
+                                  id="remove"
+                                  data-toggle="modal"
+                                  data-target="#ModalBoardRemove"
+                                  data-id="@r.BoardId"
+                                  title="Удалить"></span>
+                        </div>
+                    </div>
+                </div>
+            }
         }
-    }
+    </div>
 </div>
+
 
 <div class="container">
     <h2>Фото</h2>
@@ -75,7 +109,7 @@
             </div>
         </div>
 
-        @foreach (var f in Model)
+        @foreach (var f in Model.Photos)
         {
             <div class="masonry-layout__panel " id="@f.PhotoId">
                 <div class="masonry-layout__panel-content ">
@@ -86,8 +120,8 @@
                               id="remove"
                               onclick="Remove(@f.PhotoId)"
                               title="Удалить"></span>
-                        <span class="glyphicon glyphicon-download-alt"
-                              id="dowenload"
+                        <span class="glyphicon glyphicon-download"
+                              id="download"
                               onclick="window.location.href='@Url.Action("GetFile", "Home", f)';"
                               title="Загрузить"></span>
                     </div>
@@ -97,7 +131,49 @@
     </div>
 </div>
 
-<!-- Модальное окно -->
+<!-- Модальное окно удалить доску-->
+<div class="modal fade" id="ModalBoardRemove" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Удалить доску?</h4>
+            </div>
+            <div class="modal-body">
+                <p>При удалении доски все сохраненые в ней фото будут также удалены, удалить?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="RemoveBoard">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно "доска"-->
+<div class="modal fade" id="ModalBoard" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Создать доску</h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" placeholder="Название доски" id="boardName" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" disabled="disabled" id="AddBoard">Готово</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно "фото"-->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -128,3 +204,5 @@
 
 <script type="text/javascript" src="~/js/DragAndDrop.js"></script>
 <script type="text/javascript" src="~/js/remove.js"></script>
+<script type="text/javascript" src="~/js/MyPageBoard.js"></script>
+<script type="text/javascript" src="~/js/RemoveBoard.js"></script>

@@ -1,8 +1,4 @@
-﻿document.getElementById('remove').addEventListener('click', function (e) {
-
-});
-
-function Remove(photo) {
+﻿function Remove(photo) {
     let form = new FormData();
     form.append('photo', photo);
 

@@ -1,9 +1,10 @@
-﻿@{
+﻿@model BCMyProject.ViewModels.IndexViewModel
+@{
     ViewData["Title"] = "main";
 }
 
 <div class="masonry-layout">
-    @foreach (var f in ViewBag.Some)
+    @foreach (var f in Model.Photo)
     {
         <div class="masonry-layout__panel">
             <div class="masonry-layout__panel-content">

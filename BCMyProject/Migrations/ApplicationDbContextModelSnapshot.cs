@@ -172,7 +172,7 @@ namespace BCMyProject.Migrations
 
                     b.HasIndex("PhotoId");
 
-                    b.ToTable("PhotoBoard");
+                    b.ToTable("PhotoBoards");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

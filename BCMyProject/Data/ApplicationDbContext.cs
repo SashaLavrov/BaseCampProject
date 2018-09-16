@@ -14,6 +14,7 @@ namespace BCMyProject.Data
         public DbSet<Photo> Photos { get; set; }
         public DbSet<Coment> Coments { get; set; }
         public DbSet<Like> Likes { get; set; }
+        public DbSet<PhotoBoard> PhotoBoards { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

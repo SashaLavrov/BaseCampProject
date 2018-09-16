@@ -1,24 +1,108 @@
-﻿@model IEnumerable<BCMyProject.Models.Photo>
+﻿@model BCMyProject.ViewModels.ShowAllPhotoInTopicViewModel
+@using BCMyProject.Exstension;
 @{
     ViewData["Title"] = ViewBag.TopicName;
 }
 
-<h2>@ViewBag.TopicName</h2>
+<h2>@Model.TopicName</h2>
 
 <div class="masonry-layout">
-    @foreach (var f in Model)
+    @foreach (var f in Model.Photo)
     {
         <div class="masonry-layout__panel">
             <div class="masonry-layout__panel-content">
                 <div class="PhotoInfo">
-                    <img src="@Url.Content(f.Path)" class="ImgInfo" />
+                    <img src="@Url.Content(f.Path)" class="ImgInfo"/>
                     <div class="mask" onclick="window.location.href='@Url.Action("ShowThisPhoto", "Home", f)';"></div>
-                    <span class="glyphicon glyphicon-download-alt"
-                          id="dowenload"
+                    <span class="glyphicon glyphicon-download"
+                          id="download"
                           onclick="window.location.href='@Url.Action("GetFile", "Home", f)';"
                           title="Загрузить"></span>
+
+                    <span class="glyphicon glyphicon-star-empty"
+                          id="SaveInMyBoards"
+                          title="Сохранить"
+                          data-whatever="@Url.Content(f.Path)"
+                          data-id="@f.PhotoId"
+                          data-toggle="modal"
+                          data-target="#ModalSave"></span>
                 </div>
             </div>
         </div>
     }
 </div>
+
+<!-- Модальное окно-->
+<div class="modal fade" id="ModalSave" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Выбор доски</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img id="modalImg" class="img-thumbnail"style="display: inline"/>
+                            <div class="col-md-12" id="modalForm" style="display: none">
+                                <label >Создать доску</label>
+                                <hr />
+                                <input type="text" placeholder="Введи название доски" class="form-control" id="boardName"/>
+                                <hr />
+                                <div class="col-md-2 col-md-offset-6">
+                                    <button class="btn btn-secondary" id="cancel">Отмена</button>
+                                </div>
+                                <div class="col-md-2 col-md-offset-1">
+                                    <button class="btn btn-primary" id="AddBoard"  disabled="disabled">Добавить</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-md-offset-1 list-group" id="listGroup">
+                            @if (!Model.Board.IsNullOrEmpty())
+                            {
+                                @foreach (Board b in Model.Board)
+                                {
+                                    <div class="row list-group-item picItem">
+                                        <div class="col-md-2" style="padding-left: 0;">
+                                            @if (!b.PhotoBoard.Select(c => c.Photo.Path).IsNullOrEmpty())
+                                            {
+                                                <img class="img-rounded"
+                                                     src="@b.PhotoBoard.Select(c => c.Photo.Path).First()"
+                                                     style="height:48px; margin-left:3px;" />
+                                            }
+                                            else
+                                            {
+                                                <img class="img-rounded"
+                                                     src="~/images/noimage.png"
+                                                     style="height:48px; margin-left:0;" />
+                                            }
+                                        </div>
+                                        <div class="col-md-6" style="text-align: center"><span>@b.BoardName</span></div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-danger" onclick="AddPhotoInBoard(@b.BoardId)">Сохранить</button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            <div class="row list-group-item picItem" id="createBoard">
+                                <div class="col-md-2" style="padding-left: 0;">
+                                    <img class="img-rounded"
+                                         src="~/images/plus.png"
+                                         style="height:48px; margin-left:0;" />
+                                </div>
+                                <div class="col-md-6" style="text-align: center"><span>Создать доску</span></div>
+                                <div class="col-md-4"></div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/ShowAllPhotoInTopic.js" type="text/javascript"></script>

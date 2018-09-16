@@ -1,0 +1,48 @@
+﻿@model BCMyProject.ViewModels.ShowAllPhotoInBoardViewModal;
+@{
+    ViewData["Title"] = "ShowAllPhotoInBoard";
+}
+
+<div class="masonry-layout">
+    @foreach (var f in Model.Photo)
+    {
+        <div class="masonry-layout__panel">
+            <div class="masonry-layout__panel-content">
+                <div class="PhotoInfo" id="@f.PhotoId">
+                    <img src="@Url.Content(f.Path)" class="ImgInfo" />
+                    <div class="mask" onclick="window.location.href='@Url.Action("ShowThisPhoto", "Home", f)';"></div>
+                    <span class="glyphicon glyphicon-download"
+                          id="download"
+                          onclick="window.location.href='@Url.Action("GetFile", "Home", f)';"
+                          title="Загрузить"></span>
+                    <span class="glyphicon glyphicon-remove"
+                          id="remove"
+                          onclick="Remove(@f.PhotoId, @Model.BoardId)"
+                          title="Удалить"></span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function Remove(photoId, boardId) {
+        let form = new FormData();
+        form.append('photoId', photoId);
+        form.append('boardId', boardId);
+
+        fetch('/Home/RemovePhotoFromBoard', {
+            method: "POST",
+            credentials: 'include',
+            body: form,
+        })
+            .then(res => {
+                if (res.status === 200)
+                    document.getElementById(photoId).remove();
+                else
+                    alert(res.status + ' - ' + res.statusText)
+            })
+            .catch(alert);
+    }
+</script>
+
