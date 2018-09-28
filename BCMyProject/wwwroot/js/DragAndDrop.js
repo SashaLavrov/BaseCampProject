@@ -21,7 +21,7 @@ function unhighlight(e) {
 
 dropArea.addEventListener('drop', handleDrop, false)
 var variable = [];
-function handleDrop(e) {// get files
+function handleDrop(e) {
     let dt = e.dataTransfer
     let files = dt.files
     variable.concat(files)
@@ -56,17 +56,22 @@ function previewFile(file) {
 
 function Upload(file) {
     let Topic = document.getElementById('topic').value;
+    let Description = document.getElementById('description').value;
     let url = '/Home/Upload'
     let formData = new FormData();
     formData.append('file', file);
     formData.append('topic', Topic);
+    formData.append('description', Description);
     fetch(url, {
         method: 'POST',
         body: formData
     })
         .then(res => {
-            if (res.status === 200)
+            if (res.status === 200) {
                 addImg(file);
+                document.getElementById('gallery').innerHTML = '';
+                variable = [];
+            }
             else
                 alert(res.status + ' - ' + res.statusText)
         })
@@ -100,7 +105,7 @@ function addImg(file) {
 
         let download = document.createElement('span');
         download.className = 'glyphicon glyphicon-download';
-        download.id = 'dowenload';
+        download.id = 'download';
         download.title = 'Загрузить';
 
         photoInfo.appendChild(img)

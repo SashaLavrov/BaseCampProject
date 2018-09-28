@@ -3,11 +3,6 @@
     this.rows = 5;
 });
 
-document.getElementById("Text").addEventListener('blur', function (e) {
-    e.preventDefault();
-    this.rows = 2;
-});
-
 if (IsLike.value == 'True') {
     likeButton.style.color = '#F0120E'; likeButton.style.border = 'solid 2px #F0120E';
 } else if (IsLike.Value == 'False') {

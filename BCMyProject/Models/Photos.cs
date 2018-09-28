@@ -17,7 +17,11 @@ namespace BCMyProject.Models
         [Required]
         public string Path { get; set; }
 
+        [MaxLength(500)]
+        public string Description { get; set; }
+
         [Required]
+        [MaxLength(50)]
         public string Topic { get; set; }
 
         [Required]

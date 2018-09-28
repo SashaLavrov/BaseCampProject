@@ -34,8 +34,21 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a asp-area="" asp-controller="Home" asp-action="MyPage">Home</a></li>
-                    @*<li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>*@
+                    @if (User.IsInRole("admin"))
+                    {
+                        <li><a asp-area="" asp-controller="Admin" asp-action="Index">admin</a></li>
+                    }
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li>
+                            <form asp-controller="Home" asp-action="SearchPhoto" class="nav navbar-form">
+                                <div class="form-group navbar-left">
+                                    <input class="form-control" type="text" name="target" placeholder="Шукать" />
+                                    <input class="btn btn-default" type="submit" value="Поиск" />
+                                </div>
+                            </form>
+                        </li>
+                    }
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")
             </div>

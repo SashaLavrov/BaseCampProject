@@ -142,6 +142,9 @@ namespace BCMyProject.Migrations
 
                     b.Property<DateTime>("Date");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(500);
+
                     b.Property<string>("Path")
                         .IsRequired();
 
@@ -150,7 +153,8 @@ namespace BCMyProject.Migrations
                         .HasMaxLength(200);
 
                     b.Property<string>("Topic")
-                        .IsRequired();
+                        .IsRequired()
+                        .HasMaxLength(50);
 
                     b.Property<string>("UserId")
                         .IsRequired();

@@ -1,5 +1,5 @@
 ﻿body {
-    background-color: #E9F0F6;
+    background-color: #EFEFEF;
 }
 
 .PhotoInfo {
@@ -26,8 +26,8 @@
 }
 
 .ImgInfo {
-    width: 100%;
-    height: auto;
+    max-width: 100%;
+    max-height: 90vh;
     position: relative;
     border-radius: 12px;
 }
@@ -63,7 +63,7 @@
 
 /*this is colum*/
 .masonry-layout {
-    column-count: 3;
+    column-count: 4;
     column-gap: 0;
 }
 
@@ -73,7 +73,7 @@
 }
 
 .masonry-layout__panel-content {
-    padding:0 10px 0 10px;
+    padding:0 5px 0 5px;
     border-radius: 14px;
 }
 
@@ -129,9 +129,8 @@ p {
 }
 
     #gallery img {
-        width: 150px;
+        max-width: 430px;
         margin-bottom: 10px;
-        margin-right: 10px;
         vertical-align: middle;
     }
 
@@ -163,8 +162,20 @@ p {
     border-radius: 12px;
     }
 
+#edit {
+    font-size: 2vw;
+    position: absolute;
+    left: 20%;
+    top: 5%;
+    visibility: hidden;
+}
+
+    #edit:hover {
+        cursor: pointer;
+    }
+
 #SaveInMyBoards {
-    font-size: 3vw;
+    font-size: 2vw;
     position: absolute;
     left: 5%;
     top: 5%;
@@ -176,7 +187,7 @@ p {
     }
 
 #download {
-    font-size: 3vw;
+    font-size: 2vw;
     position: absolute;
     left: 80%;
     top: 5%;
@@ -188,7 +199,7 @@ p {
     }
 
 #remove {
-    font-size: 3vw;
+    font-size: 2vw;
     position: absolute;
     left: 5%;
     top: 5%;
@@ -217,8 +228,14 @@ p {
     visibility: visible;
 }
 
+.PhotoInfo:hover #edit {
+    color: #ffffff;
+    opacity: 1;
+    visibility: visible;
+}
+
 .picItem {
-   line-height: 48px;
+    line-height: 48px;
 }
 
 .picItem button {

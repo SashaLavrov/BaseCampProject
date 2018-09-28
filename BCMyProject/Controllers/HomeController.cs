@@ -34,77 +34,132 @@ namespace BCMyProject.Controllers
 
         private Task<ApplicationUser> GetCurrentUserAsync() => _userManager.GetUserAsync(HttpContext.User);
 
-        public IActionResult Index()
-        {
-            IEnumerable<Photo> photo = _db.Photos
-                .GroupBy(x => x.Topic)
-                .Select(grp => grp.First())
-                .Distinct();
-
-            IndexViewModel model = new IndexViewModel {
-                Photo = photo,
-            };
-
-            return View(model);
-        }
-
-        public async Task<ViewResult> ShowAllPhotoInTopic(string topic)
+        public async Task<IActionResult> Index()
         {
             ApplicationUser user = await GetCurrentUserAsync();
-            IEnumerable<Photo> Photo = _db.Photos
-                .Where(x => x.Topic == topic);
+
+            IEnumerable<Photo> photo = _db.Photos
+                .OrderByDescending(x => x.Date);
+
             IEnumerable<Board> Board = _db.Boards
                 .Where(b => b.UserId == user.Id)
                 .Include(b => b.PhotoBoard)
                 .ThenInclude(b => b.Photo);
 
-            ShowAllPhotoInTopicViewModel model = new ShowAllPhotoInTopicViewModel {
-                Photo = Photo,
-                TopicName = topic,
-                Board = Board,                
+            MainViewModel model = new MainViewModel
+            {
+                Photo = photo,
+                Board = Board,
             };
+
             return View(model);
         }
 
+        public async Task<IActionResult> ChangePhoto(int photoId)
+        {
+            ApplicationUser user = await GetCurrentUserAsync();
+
+            Photo photo = await _db.Photos
+                .Where(x => x.PhotoId == photoId && x.UserId == user.Id)
+                .FirstOrDefaultAsync();
+            ChangePhotoViewModel model = new ChangePhotoViewModel
+            {
+                Photo = photo
+            };
+             return View(model);
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file, string topic)
+        public async Task<IActionResult> ChangePhoto(int id, string description, string topic)
+        {
+            ApplicationUser user = await GetCurrentUserAsync();
+            var ph = await _db.Photos.Where(x => x.PhotoId == id && x.UserId == user.Id).FirstOrDefaultAsync();
+            if(ph != null)
+            {
+                ph.Topic = topic;
+                ph.Description = description;
+            }
+            _db.SaveChanges();
+            return RedirectToAction("MyPage");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SearchPhoto(string target)
+        {
+            ApplicationUser user = await GetCurrentUserAsync();
+
+            IEnumerable<Photo> photoT = _db.Photos
+                .Where(x => x.Topic.Contains(target))
+                .OrderByDescending(x => x.Date);
+
+            IEnumerable<Photo> photoD = _db.Photos
+                .Where(x => x.Description.Contains(target))
+                .OrderByDescending(x => x.Date);
+
+            IEnumerable<Photo> res = photoT
+                .Union(photoD);
+
+            IEnumerable<Board> Board = _db.Boards
+                .Where(b => b.UserId == user.Id)
+                .Include(b => b.PhotoBoard)
+                .ThenInclude(b => b.Photo);
+            MainViewModel model = new MainViewModel
+            {
+                Photo = res,
+                Board = Board
+            };
+            return View("Index", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Upload(IFormFile file, string topic, string description)
         {
             if (topic == null)
             {
-                topic = "Разное";
+                topic = "Без темы";
             }
             ApplicationUser User = await GetCurrentUserAsync();
-            string path = "/Files/" + file.FileName;
+            Photo photo = new Photo
+            {
+                Path = "/Files/",
+                PhotoName = file.FileName,
+                Topic = topic,
+                Date = DateTime.Now,
+                User = User,
+                Description = description,
+            };
+            _db.Photos.Add(photo);
+            _db.SaveChanges();
+
+            var newName = photo.PhotoId + photo.PhotoName;
+            photo.PhotoName = newName;
+            photo.Path += newName;
+            _db.SaveChanges();
+
+            string path = "/Files/" + newName;
             if (file.Length > 0)
                 using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);
-                }   
-            Photo photo = new Photo
-            {
-                PhotoName = file.FileName,
-                Path = path,
-                Topic = topic,
-                Date = DateTime.Now,
-                User = User,
-            };
-            _db.Photos.Add(photo);
-            _db.SaveChanges();
+                }
             return Ok();
         }
 
-        public async Task<IActionResult> ShowThisPhoto(Photo photo)
+        public async Task<IActionResult> ShowThisPhoto(int photoId)
         {
             ApplicationUser user = await GetCurrentUserAsync();
+
+            Photo ph = _db.Photos.Where(x => x.PhotoId == photoId).Include(x => x.User).FirstOrDefault();
+
             List<Coment> coments = _db.Coments
                 .Include(u => u.User)
-                .Where(x => x.Photo == photo)
+                .Where(x => x.Photo.PhotoId == photoId)
                 .ToList();
             int ratingVal = _db.Likes
-                .Where(l => l.PhotoId == photo.PhotoId)
+                .Where(l => l.PhotoId == photoId)
                 .Count();
             bool isLike = _db.Likes
-                .Where(x => x.PhotoId == photo.PhotoId && x.UserId == user.Id)
+                .Where(x => x.PhotoId == photoId && x.UserId == user.Id)
                 .IsNullOrEmpty();
             IEnumerable<Board> Board = _db.Boards
                 .Where(b => b.UserId == user.Id)
@@ -114,23 +169,20 @@ namespace BCMyProject.Controllers
             {
                 Coments = coments,
                 IsCurrentUserLike = !isLike,
-                Photo = photo,
+                Photo = ph,
                 Rating = ratingVal,
-                Board = Board
+                Board = Board,
+
             };
             return View(model);
         }
 
         public IActionResult GetFile(Photo photo)
         {
-            // Путь к файлу
             string file_path = Path.Combine(_appEnvironment.ContentRootPath, $"wwwroot{photo.Path}");
             string MyString = Path.GetExtension(photo.Path);
-            char[] MyChar = { '.' };
-            string NewString = MyString.TrimStart(MyChar);
-            // Тип файла - content-type
+            string NewString = MyString.TrimStart('.');
             string file_type = $"application/{NewString}";
-            // Имя файла - необязательно
             PhysicalFileResult res = PhysicalFile(file_path, file_type,photo.PhotoId + "." + NewString);
             return res;
         }

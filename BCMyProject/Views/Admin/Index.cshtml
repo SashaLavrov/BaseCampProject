@@ -1,0 +1,19 @@
+﻿@model IEnumerable<BCMyProject.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<table>
+    <tr>
+        <td>Email</td>
+        <td></td>
+    </tr>
+    @foreach(var i in Model)
+    { 
+    <tr>
+        <td>@i.Email</td>
+        <td ><button class="btn btn-danger" style="margin-left: 20px;" 
+                     onclick="window.location.href='@Url.Action("DropUser", "Admin", new { i.Id })';">Удалить</button></td>
+    </tr>
+    }
+</table>

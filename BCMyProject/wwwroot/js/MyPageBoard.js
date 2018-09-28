@@ -25,6 +25,7 @@ AddBoard.addEventListener('click', function (e) {
         })
         .then(responce => {
             create(boardName, responce);
+            boardName.value = '';
         })
         .catch(alert);
 });
